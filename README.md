@@ -10,6 +10,22 @@ Anonymize PII before sending data to LLMs.
 - Utility masking and validation helpers (Luhn, API-key heuristics)
 - Zero dependency runtime
 
+## Demo
+
+```text
+$ pii-guard --text "Bonjour, je suis Marie Dupont, mon email est marie.dupont@cabinet-legal.fr et mon numéro est le 06 12 34 56 78."
+
+✓ 3 PII detected in 0.019ms
+
+Anonymized:
+"Bonjour, je suis [NAME_1], mon email est [EMAIL_1] et mon numéro est le [PHONE_1]."
+
+Map:
+NAME_1   → Marie Dupont
+EMAIL_1  → marie.dupont@cabinet-legal.fr
+PHONE_1  → 06 12 34 56 78
+```
+
 ## PII types (initial)
 
 - EMAIL
@@ -80,6 +96,13 @@ All thresholds validated in tests:
 ## Security note
 
 This project relies on regex/heuristics and can produce false positives/false negatives. For regulated use-cases, combine with human review and domain-specific controls.
+
+## Why this exists
+
+On August 2, 2026, the EU AI Act starts applying to high-risk AI systems.
+Every unfiltered LLM request that contains personal data is a potential GDPR violation.
+This module is a first practical protection layer you can deploy immediately in front of LLM calls.
+It runs offline, with zero cloud dependency, so personal data does not have to leave the machine.
 
 ## License
 
