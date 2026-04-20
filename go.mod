@@ -1,4 +1,4 @@
-module github.com/veez-ai/veez-pii-guard
+module github.com/adminveez/Veez-pii-guard
 
 go 1.22
 

@@ -30,8 +30,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/veez-ai/veez-pii-guard/bench/dataset"
-	"github.com/veez-ai/veez-pii-guard/pii"
+	"github.com/adminveez/Veez-pii-guard/bench/dataset"
+	"github.com/adminveez/Veez-pii-guard/pii"
 )
 
 type result struct {

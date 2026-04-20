@@ -23,7 +23,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/veez-ai/veez-pii-guard/pii"
+	"github.com/adminveez/Veez-pii-guard/pii"
 )
 
 type rpcRequest struct {

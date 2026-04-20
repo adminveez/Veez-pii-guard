@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/veez-ai/veez-pii-guard/pii"
+	"github.com/adminveez/Veez-pii-guard/pii"
 )
 
 func main() {

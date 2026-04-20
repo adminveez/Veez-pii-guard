@@ -74,14 +74,32 @@ See [`CHANGELOG.md`](CHANGELOG.md) and [`docs/ARCHITECTURE_DECISIONS.md`](docs/A
 
 ## Demo
 
+**Before** — what your app would send to OpenAI / Anthropic / Mistral:
+
+```text
+Marie Dupont, marie.dupont@cabinet-legal.fr, +33 6 12 34 56 78,
+IBAN FR76 3000 4000 0312 3456 7890 143, SIRET 552 100 554 00013
+```
+
+**After** — what `veez-pii-guard` lets through:
+
+```text
+[NAME_1], [EMAIL_1], [PHONE_1],
+IBAN [IBAN_1], SIRET [SIRET_1]
+```
+
+**One command:**
+
 ```text
 $ pii-guard scan --text "Marie Dupont, marie.dupont@cabinet-legal.fr, +33 6 12 34 56 78"
 
-detections: 2
+detections: 3
 blocked:    false
 anonymized:
-Marie Dupont, [EMAIL_1], [PHONE_1]
+  Marie Dupont, [EMAIL_1], [PHONE_1]
 ```
+
+**Detail mode** — every span, every confidence:
 
 ```text
 $ pii-guard explain --text "Authorization: Bearer eyJhbGc..."
@@ -93,6 +111,14 @@ Found 1 detection:
       text:       eyJhbGc...
       confidence: 0.95
       source:     regex:bearer_token
+```
+
+**Reversible** — keep the mapping, reidentify after the LLM responds:
+
+```go
+res := d.Scan(ctx, input)              // [EMAIL_1], [PHONE_1] ...
+llmReply := callOpenAI(res.AnonymizedText)
+final := pii.Reidentify(llmReply, res.Mappings)  // back to real values
 ```
 
 ---
@@ -117,14 +143,14 @@ Found 1 detection:
 ### CLI
 
 ```bash
-go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard@latest
-go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard-lsp@latest
+go install github.com/adminveez/Veez-pii-guard/cmd/pii-guard@latest
+go install github.com/adminveez/Veez-pii-guard/cmd/pii-guard-lsp@latest
 ```
 
 ### As a library
 
 ```bash
-go get github.com/veez-ai/veez-pii-guard
+go get github.com/adminveez/Veez-pii-guard
 ```
 
 ### Docker
@@ -145,7 +171,7 @@ import (
     "context"
     "fmt"
 
-    "github.com/veez-ai/veez-pii-guard/pii"
+    "github.com/adminveez/Veez-pii-guard/pii"
 )
 
 func main() {
@@ -282,7 +308,7 @@ See [`examples/wasm-demo/index.html`](examples/wasm-demo/index.html) for a worki
 Compatible with VS Code, Neovim, Helix, Emacs, and any editor that supports LSP.
 
 ```bash
-go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard-lsp@latest
+go install github.com/adminveez/Veez-pii-guard/cmd/pii-guard-lsp@latest
 ```
 
 Configure your editor to launch `pii-guard-lsp` as a language server for the file types you want monitored. No configuration file required.
@@ -361,10 +387,39 @@ The harness outputs precision / recall / F1 per PII type and can run against ext
 
 ## Why this exists
 
-On August 2, 2026, the EU AI Act begins applying to high-risk AI systems.  
-Every unfiltered LLM request containing personal data is a potential GDPR violation.
+### The legal pressure is real, and it lands in 2026
 
-This module is a practical first line of defence you can deploy immediately in front of any LLM call. It runs offline, with zero cloud dependency, so personal data never has to leave the machine.
+| Date | Regulation | What it means for LLM apps |
+| --- | --- | --- |
+| **Already in force** | **GDPR (since 2018)** | Sending personal data to a US-hosted LLM without a legal basis = up to **4% of worldwide revenue** in fines. |
+| **Feb 2, 2025** | **EU AI Act — prohibitions** | Some uses (social scoring, manipulation) are already banned. |
+| **Aug 2, 2025** | **EU AI Act — GPAI obligations** | Foundation models (GPT, Claude, Mistral, Llama) must publish training data summaries and respect EU copyright. |
+| **Aug 2, 2026** | **EU AI Act — high-risk systems** | Full obligations apply. Any AI handling HR, healthcare, credit, justice, education must log inputs and prove data minimisation. |
+| **Aug 2, 2027** | **EU AI Act — full enforcement** | All provisions in force. Fines up to **€35M or 7% of revenue**. |
+
+### What unfiltered LLM calls actually leak
+
+Names. Emails. Phone numbers. National IDs (NIR, SSN). Bank accounts (IBAN). Company
+identifiers (SIRET, SIREN, VAT). Driver licences. API keys and bearer tokens.
+Sometimes entire contracts pasted in a chat box "to summarise".
+
+Most of it ends up sitting on US infrastructure, often used for retraining,
+subject to the **CLOUD Act** — which means a US authority can subpoena it without
+notifying you or your users.
+
+### What this module does about it
+
+`veez-pii-guard` sits **between your code and the LLM provider**. Every prompt
+passes through it first. PII is replaced by deterministic placeholders
+(`[EMAIL_1]`, `[NAME_1]`, ...). The LLM sees the structure, not the data.
+The original mapping stays in your process, so you can reidentify the response
+locally.
+
+It runs offline. Zero network. Zero dependency. Pure Go standard library.
+You can audit every line.
+
+This is not a complete compliance solution. It is the **first line of defence**
+any serious EU AI deployment will need — and the cheapest one to add today.
 
 ---
 
@@ -382,15 +437,46 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) if it exists, or follow standard Go pro
 
 ## Built as part of something bigger
 
-`veez-pii-guard` is the first public building block of **VEEZ**.
+<div align="center">
 
-VEEZ is a sovereign AI infrastructure for European companies that cannot afford to send their data through American clouds — and increasingly, cannot legally do so either.
+<pre>
+██╗   ██╗███████╗███████╗███████╗
+██║   ██║██╔════╝██╔════╝╚══███╔╝
+██║   ██║█████╗  █████╗    ███╔╝ 
+╚██╗ ██╔╝██╔══╝  ██╔══╝   ███╔╝  
+ ╚████╔╝ ███████╗███████╗███████╗
+  ╚═══╝  ╚══════╝╚══════╝╚══════╝
+</pre>
 
-It is being built by one developer. Quietly. From scratch.
+**Sovereign AI infrastructure for Europe.**
 
-The rest is coming. No roadmap, no countdown — just work.
+</div>
 
-→ If this resonates with you — engineer, operator, or simply curious — reach out.
+`veez-pii-guard` is the **first public building block of VEEZ** — a sovereign AI
+platform built for European companies that cannot afford to send their data
+through American clouds, and increasingly cannot legally do so.
+
+### What VEEZ is building
+
+- **Local-first AI runtime** — your data, your machines, your control
+- **EU-hosted gateway** — multi-tenant SaaS for teams, on EU sovereign cloud
+- **Compliance by design** — GDPR, EU AI Act, NIS2, DORA aligned from day one
+- **Open building blocks** — like this one, MIT-licensed, so anyone can audit and reuse
+
+### Who is building it
+
+One founder. Solo. From scratch. Shipping in public.
+
+No VC. No marketing team. No countdown. Just code that works, released as it
+stabilises. `veez-pii-guard` is the first piece you can use today.
+
+### Where to find the rest
+
+- GitHub: [github.com/adminveez](https://github.com/adminveez)
+- Topics: `#sovereign-ai` `#eu-ai-act` `#gdpr` `#made-in-france` `#privacy-first`
+
+If this resonates with you — engineer, operator, investor, or simply curious —
+open an issue, star the repo, or reach out.
 
 ---
 

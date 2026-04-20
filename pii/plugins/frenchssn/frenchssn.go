@@ -6,7 +6,7 @@ package frenchssn
 import (
 	"regexp"
 
-	"github.com/veez-ai/veez-pii-guard/pii"
+	"github.com/adminveez/Veez-pii-guard/pii"
 )
 
 var re = regexp.MustCompile(`\b[12][0-9]{2}(?:0[1-9]|1[0-2])(?:(?:0[1-9]|[1-8][0-9]|9[0-5])|2[AB])[0-9]{3}[0-9]{3}(?:\s?[0-9]{2})?\b`)

@@ -10,7 +10,7 @@ ADRs are immutable once accepted. New decisions get a new ADR; superseded ones a
 ## ADR-001 — Pure-Go-first, Rust opt-in
 
 
-**Context.** Detection runs in security-sensitive paths and is the hot loop of every call. Memory safety matters. Performance matters. But so does `go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard@latest` working on every developer's machine in 2 seconds, with no toolchain dance.
+**Context.** Detection runs in security-sensitive paths and is the hot loop of every call. Memory safety matters. Performance matters. But so does `go install github.com/adminveez/Veez-pii-guard/cmd/pii-guard@latest` working on every developer's machine in 2 seconds, with no toolchain dance.
 
 **Decision.** The default build is **pure Go, zero CGo, zero non-stdlib runtime dependency**. A Rust engine lives under `engine-rust/` and is wired in *only* when the user builds with `-tags veezrust`. The two engines implement the same internal `patternMatcher` interface (see ADR-002) and are property-tested for output equivalence.
 

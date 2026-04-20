@@ -1,7 +1,7 @@
 package pii
 
 import (
-	piictx "github.com/veez-ai/veez-pii-guard/pii/context"
+	piictx "github.com/adminveez/Veez-pii-guard/pii/context"
 )
 
 // runNamePass implements the contextual second-pass name detector described

@@ -6,7 +6,7 @@ package siretsiren
 import (
 	"regexp"
 
-	"github.com/veez-ai/veez-pii-guard/pii"
+	"github.com/adminveez/Veez-pii-guard/pii"
 )
 
 var (

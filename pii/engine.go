@@ -7,7 +7,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/veez-ai/veez-pii-guard/pii/patterns"
+	"github.com/adminveez/Veez-pii-guard/pii/patterns"
 )
 
 // Detector is the orchestrator. It owns config, the matcher set, and the set
