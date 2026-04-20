@@ -1,3 +1,5 @@
+// Command pii-guard scans, anonymizes and explains PII in text input.
+// See "pii-guard help" for usage.
 package main
 
 import (

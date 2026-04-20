@@ -1,5 +1,3 @@
-# veez-pii-guard
-
 <pre align="center">
 __     _______ _____ _____
 \ \   / / ____| ____|__  /
@@ -8,33 +6,34 @@ __     _______ _____ _____
    \_/  |_____|_____/____|
 </pre>
 
-<h1 align="center">veez-pii-guard</h1>
+<h1 align="center">VEEZ</h1>
 
-<p align="center">Offline PII detection and anonymization for LLM-bound text in pure Go.</p>
+<h3 align="center">veez-pii-guard</h3>
+
+<p align="center">Offline PII detection and anonymization for LLM-bound text. Pure Go, plugin-based, stream-capable.</p>
 
 <p align="center">
   <a href="https://github.com/adminveez/Veez-pii-guard/actions/workflows/ci.yml"><img src="https://github.com/adminveez/Veez-pii-guard/actions/workflows/ci.yml/badge.svg?branch=main" alt="Build status"></a>
-  <a href="https://github.com/adminveez/Veez-pii-guard#benchmarks"><img src="https://img.shields.io/badge/coverage-88.8%25-brightgreen" alt="Coverage"></a>
+  <a href="https://github.com/adminveez/Veez-pii-guard"><img src="https://img.shields.io/badge/coverage-88.8%25-brightgreen" alt="Coverage"></a>
   <a href="https://go.dev/doc/devel/release#go1.22.0"><img src="https://img.shields.io/badge/go-1.22-00ADD8?logo=go" alt="Go version"></a>
   <a href="https://github.com/adminveez/Veez-pii-guard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
   <a href="https://goreportcard.com/report/github.com/adminveez/Veez-pii-guard"><img src="https://goreportcard.com/badge/github.com/adminveez/Veez-pii-guard" alt="Go Report Card"></a>
-  <a href="https://github.com/adminveez/Veez-pii-guard/stargazers"><img src="https://img.shields.io/github/stars/adminveez/Veez-pii-guard?style=social" alt="GitHub stars"></a>
 </p>
 
 ---
 
-## What's new in v0.2 🚀
+## What's new in v0.2
 
-- **PatternPlugin** API — register custom detectors at runtime ([`pii.Detector.Register`](pii/engine.go))
+- **PatternPlugin** API — register custom detectors at runtime ([`pii/engine.go`](pii/engine.go))
 - **Built-in plugins** — French SSN (NIR), SIRET/SIREN with Luhn, EU driver license
-- **Stream scanner** — detect PII in arbitrarily large inputs without loading into memory ([`pii.StreamScanner`](pii/stream.go))
+- **Stream scanner** — detect PII in arbitrarily large inputs without loading into memory ([`pii/stream.go`](pii/stream.go))
 - **WASM build** — same engine in the browser, ~3.5 MB ([`examples/wasm-demo/`](examples/wasm-demo/))
 - **LSP server** — `pii-guard-lsp` highlights PII as diagnostics in any LSP-capable editor ([`cmd/pii-guard-lsp/`](cmd/pii-guard-lsp/))
 - **Pre-commit hook** — block commits leaking PII ([`.pre-commit-hooks.yaml`](.pre-commit-hooks.yaml))
 - **Optional Rust backend** — opt-in via `-tags veezrust` for high-volume regex passes ([`engine-rust/`](engine-rust/))
 - **Benchmark harness** — reproducible comparison against Presidio / spaCy ([`bench/README.md`](bench/README.md))
 - **Property tests** — invariants verified with `pgregory.net/rapid` on 1000+ random inputs
-- **Breaking change** — `NewDetector(cfg) (*Detector, error)` instead of `NewDetector(cfg) *Detector`. Use `MustNewDetector` for the previous behavior.
+- **Breaking change** — `NewDetector(cfg) (*Detector, error)`. Use `MustNewDetector` for the previous panic-on-error behavior.
 
 See [`CHANGELOG.md`](CHANGELOG.md) and [`docs/ARCHITECTURE_DECISIONS.md`](docs/ARCHITECTURE_DECISIONS.md).
 
@@ -47,49 +46,50 @@ See [`CHANGELOG.md`](CHANGELOG.md) and [`docs/ARCHITECTURE_DECISIONS.md`](docs/A
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [CLI Usage](#cli-usage)
+- [Plugins](#plugins)
+- [WASM](#wasm)
+- [LSP server](#lsp-server)
 - [Architecture](#architecture)
 - [Benchmarks](#benchmarks)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [Code of Conduct](#code-of-conduct)
 - [Why this exists](#why-this-exists)
+- [Built as part of something bigger](#built-as-part-of-something-bigger)
 - [License](#license)
-- [About VEEZ](#about-veez)
 
 ---
 
 ## Demo
 
 ```text
-$ pii-guard --text "Bonjour, je suis Marie Dupont, mon email est marie.dupont@cabinet-legal.fr et mon numéro est le 06 12 34 56 78"
+$ pii-guard scan --text "Marie Dupont, marie.dupont@cabinet-legal.fr, 06 12 34 56 78"
 detections: 2
 blocked: false
 anonymized:
-Bonjour, je suis Marie Dupont, mon email est [EMAIL_1] et mon numéro est le [PHONE_1]
+Marie Dupont, [EMAIL_1], [PHONE_1]
 ```
 
 ---
 
 ## Features
 
-- `🧱` Pure Go core with zero runtime dependencies
-- `🔒` Offline processing so text stays on the machine
-- `📍` Deterministic placeholders plus reversible mapping support
-- `🧪` Tested thresholds for latency, throughput, and concurrency
-- `🖥️` CLI for direct text, files, or piped stdin
-- `📦` Small surface area that is easy to embed in other Go services
+- Pure Go core, zero runtime dependencies
+- Offline processing — text never leaves the machine
+- Deterministic placeholders + reversible mapping
+- Runtime-pluggable detectors via `PatternPlugin`
+- Stream scanner for arbitrarily large inputs
+- WASM build for the browser
+- LSP server for editor integration
+- Optional Rust acceleration backend (opt-in)
 
 ---
 
 ## Installation
 
-### Go install
-
 ```bash
 go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard@latest
+go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard-lsp@latest
 ```
 
-### Docker
+Docker:
 
 ```bash
 docker build -t veez-pii-guard .
@@ -102,14 +102,21 @@ docker run --rm veez-pii-guard --help
 
 ```go
 package main
+
 import (
     "context"
     "fmt"
+
     "github.com/veez-ai/veez-pii-guard/pii"
 )
+
 func main() {
-    r := pii.NewDetector(pii.DefaultConfig()).Scan(context.Background(), "john@example.com")
-    fmt.Println(r.AnonymizedText)
+    d, err := pii.NewDetector(pii.DefaultConfig())
+    if err != nil {
+        panic(err)
+    }
+    res := d.Scan(context.Background(), "contact john@example.com")
+    fmt.Println(res.AnonymizedText) // contact [EMAIL_1]
 }
 ```
 
@@ -117,16 +124,69 @@ func main() {
 
 ## CLI Usage
 
-| Flag | Scope | Description | Example |
-| --- | --- | --- | --- |
-| `--text` | `scan`, `anonymize` | Scan raw inline text | `pii-guard --text "john@example.com"` |
-| `--file` | `scan`, `anonymize` | Read input from a file | `pii-guard --file contract.txt` |
-| `--format` | `scan`, `anonymize` | Output format: `text` or `json` | `pii-guard --text "john@example.com" --format json` |
-| `--block-on-secrets` | `scan` | Fail when secrets are detected | `pii-guard scan --text "password=secret" --block-on-secrets=true` |
-| `--block-on-pii` | `scan` | Fail when any PII is detected | `pii-guard scan --text "john@example.com" --block-on-pii=true` |
-| `--block-threshold` | `scan` | Block when detection count reaches the threshold | `pii-guard scan --file batch.txt --block-threshold 10` |
+```text
+pii-guard <command> [flags]
 
-The CLI also accepts piped stdin when no `--text` or `--file` flag is provided.
+Commands:
+  scan        Detect PII and optionally block on policy violations.
+  anonymize   Print anonymized text with deterministic placeholders.
+  explain     Print every detection with its source pattern, span and confidence.
+  stream      Stream-scan stdin and emit JSON per chunk.
+  version     Print the build version.
+```
+
+Pre-commit shortcut:
+
+```bash
+pii-guard scan --block file1.go file2.md   # exits 2 if any PII is found
+```
+
+---
+
+## Plugins
+
+```go
+type MyPlugin struct{}
+
+func (MyPlugin) Name() string { return "my-plugin" }
+func (MyPlugin) Detect(text string) []pii.Match {
+    // return []pii.Match{...}
+    return nil
+}
+
+d, _ := pii.NewDetector(pii.DefaultConfig())
+d.Register(MyPlugin{})
+```
+
+Built-in plugins live under [`pii/plugins/`](pii/plugins/):
+
+- `frenchssn` — NIR (French social security number) with checksum validation
+- `siretsiren` — SIRET / SIREN with Luhn mod-10
+- `eudriverlicense` — EU driver license card numbers
+
+---
+
+## WASM
+
+```bash
+make wasm
+# produces wasm/veez-pii.wasm (~3.5 MB)
+```
+
+See [`examples/wasm-demo/index.html`](examples/wasm-demo/index.html) for a vanilla HTML/JS demo.
+The exposed JS API: `veezPiiAnonymize(text)`, `veezPiiScan(text)`, `veezPiiVersion()`.
+
+---
+
+## LSP server
+
+`pii-guard-lsp` is a minimal Language Server that publishes PII detections as diagnostics. It works in any LSP-capable editor (VS Code, Neovim, Helix, Emacs).
+
+```bash
+go install github.com/veez-ai/veez-pii-guard/cmd/pii-guard-lsp@latest
+```
+
+Configure your editor to launch `pii-guard-lsp` for the file types you want monitored.
 
 ---
 
@@ -134,50 +194,42 @@ The CLI also accepts piped stdin when no `--text` or `--file` flag is provided.
 
 ```text
 veez-pii-guard/
-├── pii/          ← core detection & anonymization engine
-├── cmd/          ← CLI entrypoint
-├── examples/     ← ready-to-run usage examples
-└── .github/      ← CI workflows
+├── pii/                 ← core engine, plugins, stream, names
+│   ├── patterns/        ← regex packs split by family
+│   ├── plugins/         ← built-in plugins (frenchssn, siretsiren, eudriverlicense)
+│   └── context/         ← embedded firstname dictionary
+├── cmd/
+│   ├── pii-guard/       ← CLI
+│   └── pii-guard-lsp/   ← LSP server
+├── wasm/                ← browser build
+├── engine-rust/         ← optional Rust acceleration crate
+├── bench/               ← reproducible benchmark harness
+├── docs/                ← ADRs
+└── .github/             ← CI matrix (Go 1.22+1.23 × 3 OS, lint, fuzz, wasm, rust)
 ```
+
+See [`docs/ARCHITECTURE_DECISIONS.md`](docs/ARCHITECTURE_DECISIONS.md) for the 8 ADRs covering plugin design, FFI, WASM, and benchmark methodology.
 
 ---
 
 ## Benchmarks
 
-| Scenario | Result | Threshold |
-| --- | ---: | ---: |
-| Short text, 100 words | `19315 ns/op` (`0.019 ms`) | `< 1 ms` |
-| Medium text, 1000 words | `159304 ns/op` (`0.159 ms`) | `< 5 ms` |
-| Long text, 10000 words | `2091130 ns/op` (`2.091 ms`) | `< 50 ms` |
-| 1000 texts in parallel | `12659217 ns/op` (`12.659 ms`) | `< 2 s` |
+Local synthetic harness (200 samples, AMD EPYC 7763, pure Go):
 
-Environment: `AMD EPYC 7763`, `go test -bench`.
+| Metric | Value |
+| --- | ---: |
+| Throughput | `5.3 M chars/sec` |
+| p50 latency | `0.018 ms` |
+| p95 latency | `0.038 ms` |
+| p99 latency | `0.045 ms` |
 
----
+Reproduce:
 
-## Roadmap
+```bash
+go run ./bench/cmd/run --engine=veez --samples=1000 --out=bench/results/veez.json
+```
 
-- [ ] Détection des noms propres via NLP léger
-- [ ] Support multilingue étendu
-- [ ] Mode stream pour les textes longs
-- [ ] Plugin Langchain
-- [ ] Dashboard de métriques
-
----
-
-## Contributing
-
-Contributions should stay focused, tested, and easy to review. If you change behavior, update the documentation and include a reproducible validation path.
-
-If you find a bug, open an issue with a minimal input sample, the expected behavior, and the actual output. Reproducible reports are the fastest to fix.
-
-If you want to propose a pull request, start with a scoped change, explain the impact clearly, and include the commands you used to validate it locally.
-
----
-
-## Code of Conduct
-
-This project follows the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md).
+Comparison methodology against Presidio and spaCy is documented in [`bench/README.md`](bench/README.md).
 
 ---
 
@@ -190,7 +242,7 @@ It runs offline, with zero cloud dependency, so personal data does not have to l
 
 ---
 
-## 🔒 Built as part of something bigger
+## Built as part of something bigger
 
 `veez-pii-guard` is the first public building block of **VEEZ**.
 
@@ -207,9 +259,3 @@ The rest is coming. No roadmap, no countdown — just work.
 ## License
 
 [MIT License](LICENSE)
-
----
-
-## About VEEZ
-
-veez-pii-guard is the first open building block of VEEZ — a sovereign AI infrastructure built for European businesses. More coming soon.

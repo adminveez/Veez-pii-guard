@@ -14,6 +14,7 @@ import (
 	"bufio"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -106,7 +107,7 @@ func (s *server) serve(r io.Reader) error {
 	br := bufio.NewReader(r)
 	for {
 		body, err := readMessage(br)
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			return nil
 		}
 		if err != nil {
@@ -195,7 +196,7 @@ func (s *server) write(payload any) {
 		log.Printf("marshal: %v", err)
 		return
 	}
-	fmt.Fprintf(s.out, "Content-Length: %d\r\n\r\n", len(body))
+	_, _ = fmt.Fprintf(s.out, "Content-Length: %d\r\n\r\n", len(body))
 	_, _ = s.out.Write(body)
 	_ = s.out.Flush()
 }

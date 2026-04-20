@@ -21,7 +21,7 @@ func FuzzScan(f *testing.F) {
 		f.Add(s)
 	}
 	d := MustNewDetector(DefaultConfig())
-	f.Fuzz(func(t *testing.T, s string) {
+	f.Fuzz(func(_ *testing.T, s string) {
 		_ = d.Scan(context.Background(), s)
 	})
 }
@@ -32,7 +32,7 @@ func FuzzAnonymize(f *testing.F) {
 		f.Add(s)
 	}
 	d := MustNewDetector(DefaultConfig())
-	f.Fuzz(func(t *testing.T, s string) {
+	f.Fuzz(func(_ *testing.T, s string) {
 		res := d.Scan(context.Background(), s)
 		_ = Anonymize(s, res.Detections)
 	})
@@ -64,7 +64,7 @@ func FuzzStream(f *testing.F) {
 	if err != nil {
 		f.Fatal(err)
 	}
-	f.Fuzz(func(t *testing.T, s string) {
+	f.Fuzz(func(_ *testing.T, s string) {
 		ch, _ := scanner.Scan(context.Background(), strings.NewReader(s))
 		for range ch {
 		}

@@ -2,6 +2,7 @@ package pii
 
 import (
 	"context"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -23,7 +24,7 @@ func TestStreamScanner_ParityWithFullScan(t *testing.T) {
 	for c := range chunks {
 		streamCount += len(c.Detections)
 	}
-	if e, ok := <-errCh; ok && e != nil && e != io.EOF {
+	if e, ok := <-errCh; ok && e != nil && !errors.Is(e, io.EOF) {
 		t.Fatalf("stream error: %v", e)
 	}
 	if streamCount < full.PIICount {

@@ -91,7 +91,7 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		defer f.Close()
+		defer func() { _ = f.Close() }()
 		enc = json.NewEncoder(f)
 	}
 	enc.SetIndent("", "  ")

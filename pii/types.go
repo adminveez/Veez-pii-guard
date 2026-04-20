@@ -11,26 +11,26 @@ package pii
 // renamed.
 type Type string
 
+// Canonical PII Type constants. New values are appended; existing values are
+// never renamed to preserve backward compatibility of serialized payloads.
 const (
-	TypeEmail       Type = "EMAIL"
-	TypePhone       Type = "PHONE"
-	TypePhoneE164   Type = "PHONE_E164"
-	TypeIBAN        Type = "IBAN"
-	TypeCreditCard  Type = "CREDIT_CARD"
-	TypeFrenchSSN   Type = "FRENCH_SSN"
-	TypeIPAddress   Type = "IP_ADDRESS"
-	TypeAPIKey      Type = "API_KEY"
-	TypeBearerToken Type = "BEARER_TOKEN"
-	TypeSecret      Type = "SECRET"
-	TypeContractRef Type = "CONTRACT_REF"
-	TypeCaseRef     Type = "CASE_REF"
-	TypeClientID    Type = "CLIENT_ID"
-	// TypePersonName is emitted by the contextual name detector (off by default).
-	TypePersonName Type = "PERSON_NAME"
-	// Plugin-emitted types (see pii/plugins/).
-	TypeSIRET           Type = "SIRET"
-	TypeSIREN           Type = "SIREN"
-	TypeEUDriverLicense Type = "EU_DRIVER_LICENSE"
+	TypeEmail           Type = "EMAIL"             // RFC-5321 mailbox
+	TypePhone           Type = "PHONE"             // National-format phone number
+	TypePhoneE164       Type = "PHONE_E164"        // E.164 international phone number
+	TypeIBAN            Type = "IBAN"              // ISO-13616 bank account
+	TypeCreditCard      Type = "CREDIT_CARD"       // PAN-like 13-19 digit sequence
+	TypeFrenchSSN       Type = "FRENCH_SSN"        // French NIR (sécurité sociale)
+	TypeIPAddress       Type = "IP_ADDRESS"        // IPv4 or IPv6
+	TypeAPIKey          Type = "API_KEY"           // Generic API key prefix
+	TypeBearerToken     Type = "BEARER_TOKEN"      // OAuth2 bearer token
+	TypeSecret          Type = "SECRET"            // Generic secret-looking value
+	TypeContractRef     Type = "CONTRACT_REF"      // Internal contract reference
+	TypeCaseRef         Type = "CASE_REF"          // Internal case reference
+	TypeClientID        Type = "CLIENT_ID"         // Internal client identifier
+	TypePersonName      Type = "PERSON_NAME"       // Emitted by contextual name detector
+	TypeSIRET           Type = "SIRET"             // French SIRET (plugin)
+	TypeSIREN           Type = "SIREN"             // French SIREN (plugin)
+	TypeEUDriverLicense Type = "EU_DRIVER_LICENSE" // EU driver license (plugin)
 )
 
 // Detection is one PII match in the source text.
