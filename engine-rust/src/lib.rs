@@ -40,7 +40,7 @@ static EMAIL: Lazy<Regex> = Lazy::new(|| {
 });
 
 static PHONE_FR: Lazy<Regex> = Lazy::new(|| {
-    Regex::new(r"\b(?:\+33|0)[1-9](?:[ .-]?\d{2}){4}\b").unwrap()
+    Regex::new(r"(?:\+33|0)[ .-]?[1-9](?:[ .-]?\d{2}){4}").unwrap()
 });
 
 static IPV4: Lazy<Regex> = Lazy::new(|| {
