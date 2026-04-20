@@ -14,12 +14,29 @@ __     _______ _____ _____
 
 <p align="center">
   <a href="https://github.com/adminveez/Veez-pii-guard/actions/workflows/ci.yml"><img src="https://github.com/adminveez/Veez-pii-guard/actions/workflows/ci.yml/badge.svg?branch=main" alt="Build status"></a>
-  <a href="https://github.com/adminveez/Veez-pii-guard#benchmarks"><img src="https://img.shields.io/badge/coverage-80.4%25-brightgreen" alt="Coverage"></a>
+  <a href="https://github.com/adminveez/Veez-pii-guard#benchmarks"><img src="https://img.shields.io/badge/coverage-88.8%25-brightgreen" alt="Coverage"></a>
   <a href="https://go.dev/doc/devel/release#go1.22.0"><img src="https://img.shields.io/badge/go-1.22-00ADD8?logo=go" alt="Go version"></a>
   <a href="https://github.com/adminveez/Veez-pii-guard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="MIT License"></a>
   <a href="https://goreportcard.com/report/github.com/adminveez/Veez-pii-guard"><img src="https://goreportcard.com/badge/github.com/adminveez/Veez-pii-guard" alt="Go Report Card"></a>
   <a href="https://github.com/adminveez/Veez-pii-guard/stargazers"><img src="https://img.shields.io/github/stars/adminveez/Veez-pii-guard?style=social" alt="GitHub stars"></a>
 </p>
+
+---
+
+## What's new in v0.2 🚀
+
+- **PatternPlugin** API — register custom detectors at runtime ([`pii.Detector.Register`](pii/engine.go))
+- **Built-in plugins** — French SSN (NIR), SIRET/SIREN with Luhn, EU driver license
+- **Stream scanner** — detect PII in arbitrarily large inputs without loading into memory ([`pii.StreamScanner`](pii/stream.go))
+- **WASM build** — same engine in the browser, ~3.5 MB ([`examples/wasm-demo/`](examples/wasm-demo/))
+- **LSP server** — `pii-guard-lsp` highlights PII as diagnostics in any LSP-capable editor ([`cmd/pii-guard-lsp/`](cmd/pii-guard-lsp/))
+- **Pre-commit hook** — block commits leaking PII ([`.pre-commit-hooks.yaml`](.pre-commit-hooks.yaml))
+- **Optional Rust backend** — opt-in via `-tags veezrust` for high-volume regex passes ([`engine-rust/`](engine-rust/))
+- **Benchmark harness** — reproducible comparison against Presidio / spaCy ([`bench/README.md`](bench/README.md))
+- **Property tests** — invariants verified with `pgregory.net/rapid` on 1000+ random inputs
+- **Breaking change** — `NewDetector(cfg) (*Detector, error)` instead of `NewDetector(cfg) *Detector`. Use `MustNewDetector` for the previous behavior.
+
+See [`CHANGELOG.md`](CHANGELOG.md) and [`docs/ARCHITECTURE_DECISIONS.md`](docs/ARCHITECTURE_DECISIONS.md).
 
 ---
 

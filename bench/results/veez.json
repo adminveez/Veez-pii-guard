@@ -1,0 +1,60 @@
+{
+  "engine": "veez",
+  "samples": 200,
+  "total_chars": 17591,
+  "wall_ms": 3.3130059999999997,
+  "p50_ms": 0.018,
+  "p95_ms": 0.038,
+  "p99_ms": 0.045,
+  "throughput_chars_per_sec": 5309679.48745037,
+  "per_type": {
+    "API_KEY": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 40,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    },
+    "EMAIL": {
+      "tp": 220,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    },
+    "IBAN": {
+      "tp": 0,
+      "fp": 15,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    },
+    "IP": {
+      "tp": 0,
+      "fp": 0,
+      "fn": 80,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    },
+    "IP_ADDRESS": {
+      "tp": 0,
+      "fp": 80,
+      "fn": 0,
+      "precision": 0,
+      "recall": 0,
+      "f1": 0
+    },
+    "PHONE": {
+      "tp": 20,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1,
+      "recall": 1,
+      "f1": 1
+    }
+  }
+}

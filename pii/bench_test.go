@@ -16,7 +16,7 @@ func buildWords(count int) string {
 }
 
 func BenchmarkScanShort100Words(b *testing.B) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := buildWords(100) + " contact: bench.short@example.com"
 	ctx := context.Background()
 	b.ReportAllocs()
@@ -26,7 +26,7 @@ func BenchmarkScanShort100Words(b *testing.B) {
 }
 
 func BenchmarkScanMedium1000Words(b *testing.B) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := buildWords(1000) + " contact: bench.medium@example.com"
 	ctx := context.Background()
 	b.ReportAllocs()
@@ -36,7 +36,7 @@ func BenchmarkScanMedium1000Words(b *testing.B) {
 }
 
 func BenchmarkScanLong10000Words(b *testing.B) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := buildWords(10000) + " contact: bench.long@example.com"
 	ctx := context.Background()
 	b.ReportAllocs()
@@ -46,7 +46,7 @@ func BenchmarkScanLong10000Words(b *testing.B) {
 }
 
 func BenchmarkScanParallel1000Texts(b *testing.B) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	texts := make([]string, 1000)
 	for i := range texts {
 		texts[i] = buildWords(100) + " contact: parallel@example.com"

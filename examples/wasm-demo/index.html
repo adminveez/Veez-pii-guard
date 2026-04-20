@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>veez-pii-guard — WASM demo</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: system-ui, sans-serif; max-width: 760px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+  h1 { font-size: 1.6rem; margin-bottom: 0.25rem; }
+  .sub { opacity: 0.7; margin-top: 0; }
+  textarea { width: 100%; min-height: 9rem; font-family: ui-monospace, monospace; font-size: 0.95rem; padding: 0.6rem; }
+  button { padding: 0.5rem 1rem; font-size: 1rem; cursor: pointer; }
+  pre { background: #0001; padding: 1rem; border-radius: 6px; overflow: auto; white-space: pre-wrap; word-break: break-word; }
+  .grid { display: grid; gap: 1rem; }
+  .badge { display:inline-block; padding:2px 8px; background:#0a0; color:#fff; border-radius:4px; font-size:0.8rem; }
+</style>
+</head>
+<body>
+
+<h1>veez-pii-guard <span class="badge">WASM</span></h1>
+<p class="sub">Offline PII redaction running entirely in your browser. No bytes leave the page.</p>
+
+<div class="grid">
+  <textarea id="input">Contact Marie at marie.dupont@example.com or +33 6 12 34 56 78. Card 4111 1111 1111 1111. Bearer abcdefghij1234567890.</textarea>
+  <div>
+    <button id="run">Anonymize</button>
+    <span id="status" class="sub"></span>
+  </div>
+  <div>
+    <strong>Anonymized output</strong>
+    <pre id="output"></pre>
+  </div>
+  <div>
+    <strong>Detections (JSON)</strong>
+    <pre id="json"></pre>
+  </div>
+</div>
+
+<script src="wasm_exec.js"></script>
+<script>
+(async () => {
+  const status = document.getElementById('status');
+  const output = document.getElementById('output');
+  const json   = document.getElementById('json');
+  const input  = document.getElementById('input');
+  const run    = document.getElementById('run');
+
+  status.textContent = 'loading WASM…';
+  const go = new Go();
+  const resp = await fetch('veez-pii-guard.wasm');
+  const { instance } = await WebAssembly.instantiateStreaming(resp, go.importObject);
+  go.run(instance);
+  status.textContent = 'ready (' + globalThis.veezPiiVersion() + ')';
+
+  run.addEventListener('click', () => {
+    const raw = globalThis.veezPiiAnonymize(input.value);
+    const res = JSON.parse(raw);
+    output.textContent = res.anonymized_text || '';
+    json.textContent = JSON.stringify(res.detections || [], null, 2);
+  });
+})();
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@ func AnonymizeWithMap(text string, detections []Detection) (string, map[string]s
 		return text, map[string]string{}
 	}
 
-	filtered := removeOverlapsByPriority(detections)
+	filtered := resolveOverlaps(detections)
 	result := text
 	mappings := make(map[string]string, len(filtered))
 

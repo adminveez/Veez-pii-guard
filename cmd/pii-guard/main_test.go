@@ -114,6 +114,8 @@ func TestHasPipedInput(t *testing.T) {
 	}
 }
 
-func TestPrintUsage(t *testing.T) {
-	printUsage()
+func TestUsageConstant(t *testing.T) {
+	if usage == "" {
+		t.Fatal("usage string must not be empty")
+	}
 }

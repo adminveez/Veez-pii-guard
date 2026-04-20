@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	d := pii.NewDetector(pii.DefaultConfig())
+	d := pii.MustNewDetector(pii.DefaultConfig())
 	input := "Bonjour, contactez marie.dupont@cabinet-legal.fr au 06 12 34 56 78"
 	res := d.Scan(context.Background(), input)
 	anonymized, mappings := pii.AnonymizeWithMap(input, res.Detections)

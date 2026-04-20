@@ -9,7 +9,7 @@ import (
 )
 
 func TestScanDetectEmail(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	res := d.Scan(context.Background(), "Contact john@example.com")
 	if res.PIICount == 0 {
 		t.Fatal("expected at least one detection")
@@ -26,7 +26,7 @@ func TestScanDetectEmail(t *testing.T) {
 }
 
 func TestOnePIIEachType(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := strings.Join([]string{
 		"john@example.com",
 		"06 12 34 56 78",
@@ -50,7 +50,7 @@ func TestOnePIIEachType(t *testing.T) {
 }
 
 func TestMultipleSameType(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := "a@b.com, c@d.com, e@f.com"
 	res := d.Scan(context.Background(), text)
 	count := 0
@@ -65,7 +65,7 @@ func TestMultipleSameType(t *testing.T) {
 }
 
 func TestMultipleMixedTypes(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := "Email: jane@corp.fr Phone: 06 12 34 56 78 IBAN: FR76 3000 6000 0112 3456 7890 189"
 	res := d.Scan(context.Background(), text)
 	if res.PIICount < 3 {
@@ -74,7 +74,7 @@ func TestMultipleMixedTypes(t *testing.T) {
 }
 
 func TestFrenchAndEnglishText(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	fr := d.Scan(context.Background(), "Bonjour, mon email est marie.dupont@cabinet.fr et mon telephone est 06 12 34 56 78")
 	en := d.Scan(context.Background(), "Hello, contact me at john.doe@firm.com and call +33 6 10 20 30 40")
 	if fr.PIICount == 0 || en.PIICount == 0 {
@@ -83,7 +83,7 @@ func TestFrenchAndEnglishText(t *testing.T) {
 }
 
 func TestEmptyText(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	res := d.Scan(context.Background(), "")
 	if res.PIICount != 0 {
 		t.Fatalf("expected 0 detection, got %d", res.PIICount)
@@ -94,7 +94,7 @@ func TestEmptyText(t *testing.T) {
 }
 
 func TestTextWithoutPIIReturnsIdentical(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	input := "Le ciel est bleu aujourd'hui"
 	res := d.Scan(context.Background(), input)
 	if res.PIICount != 0 {
@@ -106,7 +106,7 @@ func TestTextWithoutPIIReturnsIdentical(t *testing.T) {
 }
 
 func TestVeryLongText10000Words(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	var b strings.Builder
 	for i := 0; i < 10000; i++ {
 		b.WriteString("mot ")
@@ -119,7 +119,7 @@ func TestVeryLongText10000Words(t *testing.T) {
 }
 
 func TestPIIAgainstPunctuation(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := "(marie@email.fr), fin."
 	res := d.Scan(context.Background(), text)
 	if res.PIICount == 0 {
@@ -128,7 +128,7 @@ func TestPIIAgainstPunctuation(t *testing.T) {
 }
 
 func TestCaseSensitivity(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := "A@B.COM a@b.com Mixed.Case@Example.FR"
 	res := d.Scan(context.Background(), text)
 	if res.PIICount < 3 {
@@ -137,7 +137,7 @@ func TestCaseSensitivity(t *testing.T) {
 }
 
 func TestConcurrentCalls100Goroutines(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	ctx := context.Background()
 	input := "Email: john@example.com Tel: 06 12 34 56 78"
 
@@ -163,7 +163,7 @@ func TestConcurrentCalls100Goroutines(t *testing.T) {
 }
 
 func TestScanAnonymize(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := "Contact john@example.com for details"
 	res := d.Scan(context.Background(), text)
 	if strings.Contains(res.AnonymizedText, "john@example.com") {
@@ -177,7 +177,7 @@ func TestScanAnonymize(t *testing.T) {
 func TestScanBlockOnSecret(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.BlockOnSecrets = true
-	d := NewDetector(cfg)
+	d := MustNewDetector(cfg)
 	res := d.Scan(context.Background(), `api_key: sk-abcdefghijklmnopqrstuvwxyz`)
 	if !res.Blocked {
 		t.Fatal("expected blocked result")
@@ -188,7 +188,7 @@ func TestScanBlockOnSecret(t *testing.T) {
 }
 
 func TestSemanticPlaceholders(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	text := "Contrat n° 2024-001. Dossier n° AFF-123. Client ID: ACME-001"
 	res := d.Scan(context.Background(), text)
 	if !strings.Contains(res.AnonymizedText, "[CONTRACT_REF]") {
@@ -203,7 +203,7 @@ func TestSemanticPlaceholders(t *testing.T) {
 }
 
 func TestMapAndReidentifyIntegrity(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	input := "Bonjour, je suis Marie Dupont, mon email est marie.dupont@cabinet-legal.fr et mon numero est 06 12 34 56 78"
 	res := d.Scan(context.Background(), input)
 	anonymized, mappings := AnonymizeWithMap(input, res.Detections)

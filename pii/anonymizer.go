@@ -6,12 +6,16 @@ import (
 )
 
 // Anonymize replaces detected PII with semantic placeholders.
+//
+// The mapping is deterministic and stable: the i-th occurrence of a given
+// type T gets the placeholder [T_i] (or a type-specific shape, see
+// semanticPlaceholder). For reversible anonymization, use AnonymizeWithMap.
 func Anonymize(text string, detections []Detection) string {
 	if len(detections) == 0 {
 		return text
 	}
 
-	filtered := removeOverlapsByPriority(detections)
+	filtered := resolveOverlaps(detections)
 	sort.Slice(filtered, func(i, j int) bool {
 		return filtered[i].Start < filtered[j].Start
 	})
@@ -31,7 +35,6 @@ func Anonymize(text string, detections []Detection) string {
 		}
 		result = result[:d.Start] + placeholders[i] + result[d.End:]
 	}
-
 	return result
 }
 
@@ -46,33 +49,4 @@ func semanticPlaceholder(piiType Type, index int) string {
 	default:
 		return fmt.Sprintf("[%s_%d]", piiType, index)
 	}
-}
-
-func removeOverlapsByPriority(detections []Detection) []Detection {
-	out := make([]Detection, len(detections))
-	copy(out, detections)
-
-	// Higher confidence first; if equal, longer match first.
-	sort.Slice(out, func(i, j int) bool {
-		if out[i].Confidence == out[j].Confidence {
-			return (out[i].End - out[i].Start) > (out[j].End - out[j].Start)
-		}
-		return out[i].Confidence > out[j].Confidence
-	})
-
-	chosen := make([]Detection, 0, len(out))
-	for _, candidate := range out {
-		overlaps := false
-		for _, kept := range chosen {
-			if candidate.Start < kept.End && kept.Start < candidate.End {
-				overlaps = true
-				break
-			}
-		}
-		if !overlaps {
-			chosen = append(chosen, candidate)
-		}
-	}
-
-	return chosen
 }

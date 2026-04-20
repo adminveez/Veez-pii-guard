@@ -1,0 +1,21 @@
+# pre-commit hook for veez-pii-guard
+# https://pre-commit.com/
+#
+# Add to your .pre-commit-config.yaml:
+#
+#   repos:
+#     - repo: https://github.com/adminveez/Veez-pii-guard
+#       rev: v0.2.0
+#       hooks:
+#         - id: pii-guard
+#
+- id: pii-guard
+  name: Block commits containing PII
+  description: |
+    Scans staged files for PII (emails, phone numbers, SSN, API keys, etc.)
+    using veez-pii-guard. Fails the commit if any high-confidence PII is
+    detected. Designed to catch leaks BEFORE they reach git history.
+  entry: pii-guard scan --block
+  language: golang
+  types: [text]
+  pass_filenames: true

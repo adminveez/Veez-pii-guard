@@ -6,10 +6,73 @@ on:
 
 jobs:
   test:
+    name: Test (Go ${{ matrix.go }} on ${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.22", "1.23"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+      - run: go test -race -count=1 ./...
+
+  coverage:
+    name: Coverage
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
-      - run: go test ./...
+      - run: go test -coverprofile=cover.out ./...
+      - run: go tool cover -func=cover.out | tail -1
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  fuzz:
+    name: Fuzz (30s smoke)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - run: |
+          for f in FuzzAnonymize FuzzScan FuzzReidentify FuzzStream; do
+            go test -run=^$ -fuzz=^${f}$ -fuzztime=30s ./pii/ || exit 1
+          done
+
+  wasm:
+    name: WASM build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+      - run: GOOS=js GOARCH=wasm go build -o /tmp/veez-pii.wasm ./wasm
+      - run: ls -la /tmp/veez-pii.wasm
+
+  rust:
+    name: Rust crate (optional)
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cd engine-rust && cargo build --release
+      - run: cd engine-rust && cargo test

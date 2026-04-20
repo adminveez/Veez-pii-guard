@@ -18,7 +18,7 @@ func generateText(words int, piiSuffix string) string {
 }
 
 func TestPerformanceThresholds(t *testing.T) {
-	d := NewDetector(DefaultConfig())
+	d := MustNewDetector(DefaultConfig())
 	ctx := context.Background()
 
 	tests := []struct {
