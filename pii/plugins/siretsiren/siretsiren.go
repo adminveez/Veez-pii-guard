@@ -28,7 +28,7 @@ func (Plugin) Confidence() float64 { return 0.85 }
 
 // Detect returns matches for both SIRET (preferred) and SIREN.
 func (Plugin) Detect(text string) []pii.Match {
-	var out []pii.Match
+	out := make([]pii.Match, 0, 4)
 	taken := map[int]bool{}
 
 	for _, m := range siretRE.FindAllStringIndex(text, -1) {

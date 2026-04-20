@@ -1,71 +1,61 @@
+version: "2"
+
 run:
   timeout: 5m
-  go: "1.22"
   tests: true
 
 linters:
-  disable-all: true
+  default: none
   enable:
+    - bodyclose
     - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - unused
-    - revive
+    - errorlint
     - gocritic
     - gosec
-    - prealloc
-    - unparam
+    - govet
+    - ineffassign
     - misspell
-    - bodyclose
-    - errorlint
     - nilerr
-    - exportloopref
-
-linters-settings:
-  revive:
+    - prealloc
+    - revive
+    - staticcheck
+    - unparam
+    - unused
+  settings:
+    revive:
+      rules:
+        - name: exported
+        - name: var-naming
+        - name: package-comments
+        - name: indent-error-flow
+        - name: error-return
+        - name: error-naming
+        - name: if-return
+        - name: increment-decrement
+        - name: range
+        - name: receiver-naming
+        - name: time-naming
+        - name: unused-parameter
+        - name: superfluous-else
+        - name: unreachable-code
+    gocritic:
+      enabled-tags:
+        - diagnostic
+        - performance
+        - style
+      disabled-checks:
+        - paramTypeCombine
+    gosec:
+      excludes:
+        - G304
+        - G404
+  exclusions:
     rules:
-      - name: exported
-        severity: warning
-        disabled: false
-      - name: var-naming
-      - name: package-comments
-      - name: indent-error-flow
-      - name: error-return
-      - name: error-naming
-      - name: if-return
-      - name: increment-decrement
-      - name: range
-      - name: receiver-naming
-      - name: time-naming
-      - name: unused-parameter
-      - name: superfluous-else
-      - name: unreachable-code
-
-  gocritic:
-    enabled-tags:
-      - diagnostic
-      - performance
-      - style
-    disabled-checks:
-      - paramTypeCombine
-
-  gosec:
-    excludes:
-      - G304 # cmd reads user-supplied paths intentionally
-      - G404 # bench dataset uses math/rand seeded deterministically
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - gosec
-        - errcheck
-        - prealloc
-    - path: pii/context/data/
-      linters:
-        - misspell
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
+      - path: _test\.go
+        linters:
+          - gosec
+          - errcheck
+          - prealloc
+      - path: pii/context/data/
+        linters:
+          - misspell

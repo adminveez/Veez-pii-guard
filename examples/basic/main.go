@@ -1,3 +1,5 @@
+// Command basic is a minimal end-to-end example of using veez-pii-guard
+// to scan and anonymize a string of text.
 package main
 
 import (

@@ -86,20 +86,30 @@ func main() {
 
 	res := benchmark(*engine, ds, run)
 	var w io.Writer = os.Stdout
+	var closer func() error
 	if *out != "" {
 		f, err := os.Create(*out)
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			os.Exit(1)
 		}
-		defer func() { _ = f.Close() }()
+		closer = f.Close
 		w = f
 	}
 	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(res); err != nil {
+		if closer != nil {
+			_ = closer()
+		}
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+	if closer != nil {
+		if err := closer(); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
 	}
 }
 
