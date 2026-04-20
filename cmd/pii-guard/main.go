@@ -122,7 +122,7 @@ func scanOne(d *pii.Detector, name, input, format string) int {
 	if format == "text" && name != "<text>" && name != "<stdin>" {
 		fmt.Printf("== %s ==\n", name)
 	}
-	if err := printResult(res, format); err != nil {
+	if err := printResult(&res, format); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		return 1
 	}
@@ -266,7 +266,7 @@ func hasPipedInput() bool {
 	return (fi.Mode() & os.ModeCharDevice) == 0
 }
 
-func printResult(result pii.Result, format string) error {
+func printResult(result *pii.Result, format string) error {
 	switch format {
 	case "text":
 		fmt.Printf("detections: %d\n", result.PIICount)

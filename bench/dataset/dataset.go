@@ -88,7 +88,7 @@ func genEmail(r *rand.Rand) Sample {
 func genLog(r *rand.Rand) Sample {
 	ip := fakeIP(r)
 	key := fakeAPIKey(r)
-	text := fmt.Sprintf(`{"ts":"2025-04-20T01:00:00Z","src":"%s","auth":"%s","msg":"ok"}`, ip, key)
+	text := fmt.Sprintf(`{"ts":"2025-04-20T01:00:00Z","src":%q,"auth":%q,"msg":"ok"}`, ip, key)
 	srcOff := len(`{"ts":"2025-04-20T01:00:00Z","src":"`)
 	authOff := srcOff + len(ip) + len(`","auth":"`)
 	return Sample{

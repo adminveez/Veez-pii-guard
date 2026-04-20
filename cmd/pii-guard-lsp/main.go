@@ -231,11 +231,11 @@ func readMessage(br *bufio.Reader) ([]byte, error) {
 	return body, nil
 }
 
-func lineCol(text string, offset int) (int, int) {
+func lineCol(text string, offset int) (line, col int) {
 	if offset > len(text) {
 		offset = len(text)
 	}
-	line, col := 0, 0
+	line, col = 0, 0
 	for i := 0; i < offset; i++ {
 		if text[i] == '\n' {
 			line++

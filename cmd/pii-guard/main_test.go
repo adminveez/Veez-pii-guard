@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io"
 	"os"
 	"path/filepath"
 	"testing"
@@ -84,7 +83,7 @@ func TestResolveInputFromPipe(t *testing.T) {
 		_ = r.Close()
 	})
 
-	_, _ = io.WriteString(w, "from-pipe@example.com")
+	_, _ = w.WriteString("from-pipe@example.com")
 	_ = w.Close()
 
 	got, err := resolveInput("", "")

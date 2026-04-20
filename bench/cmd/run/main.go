@@ -6,15 +6,15 @@
 //   - Dataset: 1000 texts across 5 categories (chat, email, log, ticket, doc)
 //   - Each text contains a known set of PII spans (ground truth).
 //   - For each engine, we measure:
-//       * precision, recall, F1 per type
-//       * p50/p95/p99 latency
-//       * throughput (chars/sec)
+//   - precision, recall, F1 per type
+//   - p50/p95/p99 latency
+//   - throughput (chars/sec)
 //   - Engines: veez (default, pure-go), veez-rust (opt-in), presidio (docker), spacy (uv).
 //
 // Usage:
 //
-//   go run ./bench/cmd/run --engine=veez --out=bench/results/veez.json
-//   go run ./bench/cmd/run --engine=veez-rust --out=bench/results/veez-rust.json
+//	go run ./bench/cmd/run --engine=veez --out=bench/results/veez.json
+//	go run ./bench/cmd/run --engine=veez-rust --out=bench/results/veez-rust.json
 //
 // The presidio and spacy adapters are external binaries invoked via exec;
 // they are optional and skipped when not present.
@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"sort"
 	"time"
@@ -84,7 +85,7 @@ func main() {
 	}
 
 	res := benchmark(*engine, ds, run)
-	enc := json.NewEncoder(os.Stdout)
+	var w io.Writer = os.Stdout
 	if *out != "" {
 		f, err := os.Create(*out)
 		if err != nil {
@@ -92,8 +93,9 @@ func main() {
 			os.Exit(1)
 		}
 		defer func() { _ = f.Close() }()
-		enc = json.NewEncoder(f)
+		w = f
 	}
+	enc := json.NewEncoder(w)
 	enc.SetIndent("", "  ")
 	if err := enc.Encode(res); err != nil {
 		fmt.Fprintln(os.Stderr, err)

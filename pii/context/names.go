@@ -67,9 +67,9 @@ func isWordRune(r rune) bool {
 	return unicode.IsLetter(r) || r == '-' || r == '\''
 }
 
-func decodeRune(b []byte) (rune, int) {
-	for _, r := range string(b) {
-		return r, len(string(r))
+func decodeRune(b []byte) (r rune, size int) {
+	for _, ru := range string(b) {
+		return ru, len(string(ru))
 	}
 	return 0, 1
 }

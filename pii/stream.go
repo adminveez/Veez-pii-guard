@@ -61,7 +61,7 @@ func NewStreamScanner(opts StreamOptions) (*StreamScanner, error) {
 
 // Scan reads from r and returns a channel of Chunks. Closes the channel on
 // EOF or context cancellation. Errors are reported via the second channel.
-func (s *StreamScanner) Scan(ctx context.Context, r io.Reader) (<-chan Chunk, <-chan error) {
+func (s *StreamScanner) Scan(ctx context.Context, r io.Reader) (chunks <-chan Chunk, errs <-chan error) {
 	out := make(chan Chunk, 4)
 	errCh := make(chan error, 1)
 

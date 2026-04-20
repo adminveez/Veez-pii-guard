@@ -1,14 +1,14 @@
 package pii
 
 // AnonymizeWithMap replaces detected PII with placeholders and returns a mapping placeholder->original value.
-func AnonymizeWithMap(text string, detections []Detection) (string, map[string]string) {
+func AnonymizeWithMap(text string, detections []Detection) (anonymized string, mappings map[string]string) {
 	if len(detections) == 0 {
 		return text, map[string]string{}
 	}
 
 	filtered := resolveOverlaps(detections)
 	result := text
-	mappings := make(map[string]string, len(filtered))
+	mappings = make(map[string]string, len(filtered))
 
 	// First pass to generate deterministic placeholder names in reading order.
 	placeholders := buildPlaceholders(filtered)
@@ -64,22 +64,22 @@ func buildPlaceholders(detections []Detection) []placeholderBinding {
 	return out
 }
 
-func replaceAll(s, old, new string) string {
-	if old == "" {
+func replaceAll(s, oldStr, newStr string) string {
+	if oldStr == "" {
 		return s
 	}
 	for {
-		idx := indexOf(s, old)
+		idx := indexOf(s, oldStr)
 		if idx < 0 {
 			break
 		}
-		s = s[:idx] + new + s[idx+len(old):]
+		s = s[:idx] + newStr + s[idx+len(oldStr):]
 	}
 	return s
 }
 
 func indexOf(s, sub string) int {
-	if len(sub) == 0 || len(sub) > len(s) {
+	if sub == "" || len(sub) > len(s) {
 		return -1
 	}
 	for i := 0; i <= len(s)-len(sub); i++ {
