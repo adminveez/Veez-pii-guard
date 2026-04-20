@@ -190,6 +190,20 @@ It runs offline, with zero cloud dependency, so personal data does not have to l
 
 ---
 
+## 🔒 Built as part of something bigger
+
+`veez-pii-guard` is the first public building block of **VEEZ**.
+
+VEEZ is a sovereign AI infrastructure for European companies that cannot afford to send their data through American clouds — and increasingly, can't legally do so either.
+
+It's being built by one developer. Quietly. From scratch.
+
+The rest is coming. No roadmap, no countdown — just work.
+
+→ If this resonates with you — engineer, operator, or simply curious — reach out.
+
+---
+
 ## License
 
 [MIT License](LICENSE)
